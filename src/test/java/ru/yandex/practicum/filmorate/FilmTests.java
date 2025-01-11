@@ -102,7 +102,7 @@ public class FilmTests {
     @Test
     @DisplayName("Валидация Film releaseDate не ранее 28.12.1985")
     void validateReleaseDate() {
-        film.setReleaseDate(LocalDate.of(1985, 12, 27));
+        film.setReleaseDate(LocalDate.of(1895, 12, 27));
 
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
         assertFalse(violations.isEmpty(), "Исключения не найдены");
