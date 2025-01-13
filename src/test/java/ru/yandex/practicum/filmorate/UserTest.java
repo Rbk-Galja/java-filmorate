@@ -65,7 +65,7 @@ public class UserTest {
                 .build();
 
         User expectedUser = userController.updateUser(updateUsers);
-        assertEquals(user.getName(), expectedUser.getName(), "Не обновляет поля");
+        assertEquals("new name", expectedUser.getName(), "Не обновляет поля");
         assertEquals(user.getId(), expectedUser.getId(), "Неверный id User");
     }
 

@@ -67,7 +67,7 @@ public class FilmTests {
                 .build();
 
         Film exspectedFilm = filmController.updateFilm(updateFilms);
-        assertEquals(film.getName(), exspectedFilm.getName(), "Не обновляет фильм");
+        assertEquals("new name", exspectedFilm.getName(), "Не обновляет фильм");
         assertEquals(film.getId(), exspectedFilm.getId(), "Неверный id обновленного фильма");
     }
 
