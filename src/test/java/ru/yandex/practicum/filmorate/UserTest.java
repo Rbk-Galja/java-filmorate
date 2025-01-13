@@ -48,11 +48,8 @@ public class UserTest {
     @Test
     @DisplayName("Создание валидного объекта User")
     void createValidUser() {
-        userController.addUser(user);
-        assertEquals(1, user.getId(), "Возвращает неверный объект");
-
-        List<User> users = userController.findAll().stream().toList();
-        User expectedUser = users.getFirst();
+        User expectedUser = userController.addUser(user);
+        assertEquals(expectedUser.getId(), user.getId(), "Возвращает неверный объект");
         assertEquals(expectedUser, user, "Сохраняет неверный объект");
     }
 
@@ -68,9 +65,9 @@ public class UserTest {
                 .birthday(LocalDate.of(1986, 10, 10))
                 .build();
 
-        userController.updateUser(updateUsers);
-        assertEquals(user.getName(), "new name", "Не обновляет поля");
-        assertEquals(user.getId(), 1, "Неверный id User");
+        User expectedUser = userController.updateUser(updateUsers);
+        assertEquals(user.getName(), expectedUser.getName(), "Не обновляет поля");
+        assertEquals(user.getId(), expectedUser.getId(), "Неверный id User");
     }
 
     @Test
@@ -151,7 +148,7 @@ public class UserTest {
     void exceptionIfIdUserNotExist() {
         userController.addUser(user);
         User userUpdate = User.builder()
-                .id(2L)
+                .id(105L)
                 .name("Галина")
                 .login("login")
                 .email("rbkgalja@yandex.ru")

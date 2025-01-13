@@ -50,7 +50,7 @@ public class FilmTests {
     @DisplayName("Создание валидного объекта Film")
     void createValidFilm() {
         Film expectedFilm = filmController.addFilm(film);
-        assertEquals(1, film.getId(), "Возвращает неверный объект");
+        assertEquals(film.getId(), expectedFilm.getId(), "Возвращает неверный объект");
         assertEquals(film, expectedFilm, "Не сохраняет объект в список");
     }
 
@@ -66,9 +66,9 @@ public class FilmTests {
                 .duration(100)
                 .build();
 
-        filmController.updateFilm(updateFilms);
-        assertEquals(film.getName(), "new name", "Не обновляет фильм");
-        assertEquals(film.getId(), 1, "Неверный id обновленного фильма");
+        Film exspectedFilm = filmController.updateFilm(updateFilms);
+        assertEquals(film.getName(), exspectedFilm.getName(), "Не обновляет фильм");
+        assertEquals(film.getId(), exspectedFilm.getId(), "Неверный id обновленного фильма");
     }
 
     @Test

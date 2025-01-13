@@ -15,18 +15,18 @@ import java.time.LocalDate;
 @Builder
 public class Film {
     @NotNull(groups = {UpdateValidate.class})
-    Long id;
+    private Long id;
 
     @NotBlank(message = "Название не должно быть пустым")
-    String name;
+    private String name;
 
     @Size(max = 200,
             message = "Длина описания не должна превышать 200 символов")
-    String description;
+    private String description;
 
     @MinimumDate
-    LocalDate releaseDate;
+    private LocalDate releaseDate;
 
     @PositiveOrZero(message = "Продолжительность не может быть меньше нуля")
-    Integer duration;
+    private Integer duration;
 }

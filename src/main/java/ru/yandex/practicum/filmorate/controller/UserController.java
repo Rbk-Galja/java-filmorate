@@ -18,7 +18,8 @@ import java.util.Map;
 public class UserController {
 
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
-    Map<Long, User> users = new HashMap<>();
+    private final Map<Long, User> users = new HashMap<>();
+    private static long nextId;
 
     @GetMapping
     public Collection<User> findAll() {
@@ -39,19 +40,14 @@ public class UserController {
 
     @PutMapping
     public User updateUser(@RequestBody @Validated(UpdateValidate.class) User newUser) {
-        log.info("Обновление пользователя User: {} началось", newUser);
-        if (users.containsKey(newUser.getId())) {
-            User oldUser = users.get(newUser.getId());
-            oldUser.setName(userName(newUser));
+        User oldUser = users.get(newUser.getId());
+        log.info("Обновление пользователя User: {} началось", oldUser);
+        if (oldUser != null) {
+            newUser.setName(userName(newUser));
             log.info("Поле имя обновлено на {}", newUser.getName());
-            oldUser.setEmail(newUser.getEmail());
-            log.info("Поле email обновлено на {}", newUser.getEmail());
-            oldUser.setLogin(newUser.getLogin());
-            log.info("Поле логин обновлено на {}", newUser.getLogin());
-            oldUser.setBirthday(newUser.getBirthday());
-            log.info("Поле дата рождения обновлено на {}", newUser.getBirthday());
+            users.put(oldUser.getId(), newUser);
             log.info("Обновление пользователя User: {} завершено", newUser);
-            return oldUser;
+            return newUser;
         }
         log.error("Пользователь с id = {} не найден", newUser.getId());
         throw new ValidationException("Пользователь с id = " + newUser.getId() + " не найден");
@@ -65,11 +61,6 @@ public class UserController {
     }
 
     private long getNextId() {
-        long currentMaxId = users.keySet()
-                .stream()
-                .mapToLong(id -> id)
-                .max()
-                .orElse(0);
-        return ++currentMaxId;
+        return ++nextId;
     }
 }

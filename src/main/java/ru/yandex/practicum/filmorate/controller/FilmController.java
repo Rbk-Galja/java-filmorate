@@ -17,8 +17,9 @@ import java.util.Map;
 @RequestMapping("/films")
 public class FilmController {
 
+    private static long nextId;
     private static final Logger log = LoggerFactory.getLogger(FilmController.class);
-    Map<Long, Film> films = new HashMap<>();
+    private final Map<Long, Film> films = new HashMap<>();
 
     @GetMapping
     public Collection<Film> findAll() {
@@ -38,30 +39,18 @@ public class FilmController {
 
     @PutMapping
     public Film updateFilm(@RequestBody @Validated(UpdateValidate.class) Film newFilm) {
-        log.info("Обновление фильма Film: {} началось", newFilm);
-        if (films.containsKey(newFilm.getId())) {
-            Film oldFilm = films.get(newFilm.getId());
-            oldFilm.setName(newFilm.getName());
-            log.info("Поле имя обновлено на {}", newFilm.getName());
-            oldFilm.setDescription(newFilm.getDescription());
-            log.info("Поле описание обновлено на {}", newFilm.getDescription());
-            oldFilm.setReleaseDate(newFilm.getReleaseDate());
-            log.info("Дата выхода обновлена на {}", newFilm.getReleaseDate());
-            oldFilm.setDuration(newFilm.getDuration());
-            log.info("Продолжительность изменена, новое значение {}", newFilm.getDuration());
+        Film oldFilm = films.get(newFilm.getId());
+        log.info("Обновление фильма Film: {} началось", oldFilm);
+        if (oldFilm != null) {
+            films.put(oldFilm.getId(), newFilm);
             log.info("Обновление фильма Film: {} завершено", newFilm);
-            return oldFilm;
+            return newFilm;
         }
         log.error("Фильм с id = {} не найден", newFilm.getId());
         throw new ValidationException("Фильм с id = " + newFilm.getId() + " не найден");
     }
 
     private long getNextId() {
-        long currentMaxId = films.keySet()
-                .stream()
-                .mapToLong(id -> id)
-                .max()
-                .orElse(0);
-        return ++currentMaxId;
+        return ++nextId;
     }
 }

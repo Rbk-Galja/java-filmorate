@@ -12,18 +12,18 @@ import java.time.LocalDate;
 @Builder
 public class User {
     @NotNull(groups = {UpdateValidate.class})
-    Long id;
+    private Long id;
 
     @NotBlank(message = "Поле email пустое")
     @Email(message = "Указан некорректный формат email")
-    String email;
+    private String email;
 
     @NotBlank
     @WhiteSpace
-    String login;
+    private String login;
 
-    String name;
+    private String name;
 
     @Past(message = "Указана некорректная дата рождения")
-    LocalDate birthday;
+    private LocalDate birthday;
 }
