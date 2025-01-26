@@ -33,7 +33,7 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User update(User newUser) {
-        User oldUser = users.get(newUser.getId());
+        User oldUser = getById(newUser.getId()));
         log.info("Обновление пользователя User: {} началось", oldUser);
         if (oldUser != null) {
             newUser.setName(userName(newUser));
@@ -48,11 +48,15 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User addFriends(Long id, Long friendId) {
-        User user = users.get(id);
-        User userFriends = users.get(friendId);
-        if (userFriends == null || user == null) {
+        User user = getById(id);
+        User userFriends = getById(friendId);
+        if (userFriends == null) {
             log.error("Запрос добавления для несуществующего id = {}", friendId);
-            throw new IdNotFoundException("Запрашиваемый id не существет");
+            throw new IdNotFoundException("Запрашиваемый id = " + friendId + " не существет");
+        }
+        if (user == null) {
+            log.error("Запрос добавления от несуществующего id = {}", id);
+            throw new IdNotFoundException("Указанный id = " + id + " не существет");
         }
         user.getFriends().add(friendId);
         userFriends.getFriends().add(id);
@@ -62,8 +66,13 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public List<User> getFriendsList(long id) {
+        User user = getById(id);
+        if (user == null) {
+            log.error("Запрос на получение списка друзей для несуществующего пользователя id = {}", id);
+            throw new IdNotFoundException("Запрос от несуществующего пользователя id = " + id);
+        }
         List<User> userList = new ArrayList<>();
-        users.get(id).getFriends().stream()
+        user.getFriends().stream()
                 .filter(idUs -> userList.add(users.get(idUs)))
                 .toList();
         log.info("Возвращаем список друзей пользователя c id = {}: \n {}", id, userList);
@@ -72,11 +81,15 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public List<User> deleteFriend(long id, long friendId) {
-        User user = users.get(id);
-        User friendUser = users.get(friendId);
-        if (friendUser == null || user == null) {
+        User user = getById(id);
+        User friendUser = getById(friendId);
+        if (friendUser == null) {
             log.error("Запрос удаления для несуществующего id = {}", friendId);
-            throw new IdNotFoundException("Запрашиваемый id не существет");
+            throw new IdNotFoundException("Запрашиваемый id = " + friendId + " не существет");
+        }
+        if (user == null) {
+            log.error("Запрос удаления от несущестующего id = {}", id);
+            throw new IdNotFoundException("Запрашиваемый id = " + id + " не существет");
         }
         user.getFriends().remove(friendId);
         log.info("Пользователь {} удален из друзей у пользователя {}", friendUser, user);
@@ -87,17 +100,23 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public List<User> getCommonFriends(long id, long otherId) {
-        if (users.get(otherId) == null) {
+        User user = getById(id);
+        User otherUser = getById(otherId);
+        if (otherUser == null) {
             log.error("Запрос для несуществующего id = {}", otherId);
             throw new IdNotFoundException("Запрашиваемый id = " + otherId + " не существет");
         }
-        List<Long> userId = users.get(id).getFriends().stream().toList();
-        List<Long> commonId = users.get(otherId).getFriends().stream()
+        if (user == null) {
+            log.error("Запрос от несуществующего id = {}", id);
+            throw new IdNotFoundException("Указанный id = " + id + " не существет");
+        }
+        List<Long> userId = user.getFriends().stream().toList();
+        List<Long> commonId = otherUser.getFriends().stream()
                 .filter(comId -> userId.contains(comId))
                 .toList();
         List<User> commonFriends = new ArrayList<>();
         commonId.stream()
-                .filter(user -> commonFriends.add(users.get(user)))
+                .filter(user1 -> commonFriends.add(users.get(user1)))
                 .toList();
         log.info("Возвращаем список общих друзей пользователей id = {} id = {} : \n {}", id, otherId, commonFriends);
         return commonFriends;
