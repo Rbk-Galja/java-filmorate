@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.IdNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
@@ -12,10 +13,12 @@ import java.util.*;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
+
 public class InMemoryFilmStorage implements FilmStorage {
 
-    private final InMemoryUserStorage userStorage;
+    @Autowired
+    private InMemoryUserStorage userStorage;
+
     private long nextId;
     private final Map<Long, Film> films = new HashMap<>();
 
