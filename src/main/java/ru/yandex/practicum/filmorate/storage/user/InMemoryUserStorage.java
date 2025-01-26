@@ -50,7 +50,7 @@ public class InMemoryUserStorage implements UserStorage {
     public User addFriends(Long id, Long friendId) {
         User user = users.get(id);
         User userFriends = users.get(friendId);
-        if (userFriends == null) {
+        if (userFriends == null || user == null) {
             log.error("Запрос добавления для несуществующего id = {}", friendId);
             throw new IdNotFoundException("Запрашиваемый id не существет");
         }
@@ -74,7 +74,7 @@ public class InMemoryUserStorage implements UserStorage {
     public List<User> deleteFriend(long id, long friendId) {
         User user = users.get(id);
         User friendUser = users.get(friendId);
-        if (friendUser == null) {
+        if (friendUser == null || user == null) {
             log.error("Запрос удаления для несуществующего id = {}", friendId);
             throw new IdNotFoundException("Запрашиваемый id не существет");
         }
@@ -89,7 +89,7 @@ public class InMemoryUserStorage implements UserStorage {
     public List<User> getCommonFriends(long id, long otherId) {
         if (users.get(otherId) == null) {
             log.error("Запрос для несуществующего id = {}", otherId);
-            throw new IdNotFoundException("Запрашиваемый id не существет");
+            throw new IdNotFoundException("Запрашиваемый id = " + otherId + " не существет");
         }
         List<Long> userId = users.get(id).getFriends().stream().toList();
         List<Long> commonId = users.get(otherId).getFriends().stream()
@@ -112,5 +112,9 @@ public class InMemoryUserStorage implements UserStorage {
 
     private long getNextId() {
         return ++nextId;
+    }
+
+    public User getById(long id) {
+        return users.get(id);
     }
 }

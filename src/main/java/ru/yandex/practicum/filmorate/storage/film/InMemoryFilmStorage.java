@@ -1,17 +1,22 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.IdNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.util.*;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class InMemoryFilmStorage implements FilmStorage {
 
+    private final InMemoryUserStorage userStorage;
     private long nextId;
     private final Map<Long, Film> films = new HashMap<>();
 
@@ -49,7 +54,11 @@ public class InMemoryFilmStorage implements FilmStorage {
         Film film = films.get(id);
         if (film == null) {
             log.error("Запрос добавления лайка для несуществующего id = {}", id);
-            throw new IdNotFoundException("Фильм с указанным id не найден");
+            throw new IdNotFoundException("Фильм с указанным id = " + id + " не найден");
+        }
+        if (userStorage.getById(userId) == null) {
+            log.error("Запрос добавления лайка от несуществующего пользователя id = {}", userId);
+            throw new IdNotFoundException("Пользователь с указанным id = " + userId + " не найден");
         }
         film.getLikes().add(userId);
         log.info("Лайк для фильма {} добавлен", film);
@@ -61,7 +70,11 @@ public class InMemoryFilmStorage implements FilmStorage {
         Film film = films.get(id);
         if (film == null) {
             log.error("Запрос на удаление лайка для несуществующего id = {}", id);
-            throw new IdNotFoundException("Фильм с указанным id не найден");
+            throw new IdNotFoundException("Фильм с указанным id = " + id + " не найден");
+        }
+        if (userStorage.getById(userId) == null) {
+            log.error("Запрос на удаление лайка от несуществующего пользователя id = {}", userId);
+            throw new IdNotFoundException("Пользователь с указанным id = " + userId + " не найден");
         }
         film.getLikes().remove(userId);
         log.info("Лайк у фильма {} удален", film);
