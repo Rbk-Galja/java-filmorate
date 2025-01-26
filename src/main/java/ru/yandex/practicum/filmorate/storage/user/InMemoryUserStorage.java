@@ -33,7 +33,7 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User update(User newUser) {
-        User oldUser = getById(newUser.getId()));
+        User oldUser = getById(newUser.getId());
         log.info("Обновление пользователя User: {} началось", oldUser);
         if (oldUser != null) {
             newUser.setName(userName(newUser));
