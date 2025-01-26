@@ -7,8 +7,6 @@ import ru.yandex.practicum.filmorate.validator.MinimumDate;
 import ru.yandex.practicum.filmorate.validator.UpdateValidate;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Film.
@@ -16,9 +14,6 @@ import java.util.Set;
 @Data
 @Builder
 public class Film {
-
-    private final Set<Long> likes = new HashSet<>();
-
     @NotNull(groups = {UpdateValidate.class})
     private Long id;
 

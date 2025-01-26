@@ -11,9 +11,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 import ru.yandex.practicum.filmorate.validator.WhiteSpace;
 
 import java.time.LocalDate;
@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class UserTest {
 
     private static final Validator validator;
-    static InMemoryUserStorage inMemoryUserStorage;
+    static UserController userController;
     User user;
 
     static {
@@ -35,7 +35,7 @@ public class UserTest {
 
     @BeforeEach
     public void createUser() {
-        inMemoryUserStorage = new InMemoryUserStorage();
+        userController = new UserController();
         user = User.builder()
                 .name("Галина")
                 .login("login")
@@ -47,7 +47,7 @@ public class UserTest {
     @Test
     @DisplayName("Создание валидного объекта User")
     void createValidUser() {
-        User expectedUser = inMemoryUserStorage.add(user);
+        User expectedUser = userController.addUser(user);
         assertEquals(expectedUser.getId(), user.getId(), "Возвращает неверный объект");
         assertEquals(expectedUser, user, "Сохраняет неверный объект");
     }
@@ -55,7 +55,7 @@ public class UserTest {
     @Test
     @DisplayName("Обновление валидного User")
     void updateValidUser() {
-        inMemoryUserStorage.add(user);
+        userController.addUser(user);
         User updateUsers = User.builder()
                 .id(user.getId())
                 .name("new name")
@@ -64,7 +64,7 @@ public class UserTest {
                 .birthday(LocalDate.of(1986, 10, 10))
                 .build();
 
-        User expectedUser = inMemoryUserStorage.update(updateUsers);
+        User expectedUser = userController.updateUser(updateUsers);
         assertEquals("new name", expectedUser.getName(), "Не обновляет поля");
         assertEquals(user.getId(), expectedUser.getId(), "Неверный id User");
     }
@@ -73,7 +73,7 @@ public class UserTest {
     @DisplayName("Замена User name логином при указании пустого name")
     void nameReplacementLogin() {
         user.setName("");
-        inMemoryUserStorage.add(user);
+        userController.addUser(user);
         assertEquals("login", user.getName(), "Не заменяет имя логином");
     }
 
@@ -145,7 +145,7 @@ public class UserTest {
     @Test
     @DisplayName("Проверка исключения при обновлении User с несуществующим id")
     void exceptionIfIdUserNotExist() {
-        inMemoryUserStorage.add(user);
+        userController.addUser(user);
         User userUpdate = User.builder()
                 .id(105L)
                 .name("Галина")
@@ -153,6 +153,6 @@ public class UserTest {
                 .email("rbkgalja@yandex.ru")
                 .birthday(LocalDate.of(1986, 12, 11))
                 .build();
-        assertThrows(ValidationException.class, () -> inMemoryUserStorage.update(userUpdate));
+        assertThrows(ValidationException.class, () -> userController.updateUser(userUpdate));
     }
 }

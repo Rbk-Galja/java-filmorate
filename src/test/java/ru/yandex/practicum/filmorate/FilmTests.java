@@ -11,9 +11,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 import ru.yandex.practicum.filmorate.validator.MinimumDate;
 
 import java.time.LocalDate;
@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class FilmTests {
 
     private static final Validator validator;
-    static InMemoryFilmStorage inMemoryFilmStorage;
+    static FilmController filmController;
     Film film;
 
     static {
@@ -36,7 +36,7 @@ public class FilmTests {
 
     @BeforeEach
     public void createObject() {
-        inMemoryFilmStorage = new InMemoryFilmStorage();
+        filmController = new FilmController();
         film = Film.builder()
                 .name("Властелин колец: Братство кольца ")
                 .description("Сказания о Средиземье — это хроника Великой войны за Кольцо, длившейся не одну тысячу лет. " +
@@ -49,7 +49,7 @@ public class FilmTests {
     @Test
     @DisplayName("Создание валидного объекта Film")
     void createValidFilm() {
-        Film expectedFilm = inMemoryFilmStorage.add(film);
+        Film expectedFilm = filmController.addFilm(film);
         assertEquals(film.getId(), expectedFilm.getId(), "Возвращает неверный объект");
         assertEquals(film, expectedFilm, "Не сохраняет объект в список");
     }
@@ -57,7 +57,7 @@ public class FilmTests {
     @Test
     @DisplayName("Обновление валидного фильма")
     void updateValidFilm() {
-        inMemoryFilmStorage.add(film);
+        filmController.addFilm(film);
         Film updateFilms = Film.builder()
                 .id(film.getId())
                 .name("new name")
@@ -66,7 +66,7 @@ public class FilmTests {
                 .duration(100)
                 .build();
 
-        Film exspectedFilm = inMemoryFilmStorage.update(updateFilms);
+        Film exspectedFilm = filmController.updateFilm(updateFilms);
         assertEquals("new name", exspectedFilm.getName(), "Не обновляет фильм");
         assertEquals(film.getId(), exspectedFilm.getId(), "Неверный id обновленного фильма");
     }
@@ -128,7 +128,7 @@ public class FilmTests {
     @Test
     @DisplayName("Проверка исключения при обновлении с несуществующим id")
     void exceptionIfIdNotExist() {
-        inMemoryFilmStorage.add(film);
+        filmController.addFilm(film);
         Film filmUpdate = Film.builder()
                 .id(2L)
                 .name("name")
@@ -136,6 +136,6 @@ public class FilmTests {
                 .releaseDate(LocalDate.of(2004, 2, 2))
                 .duration(20)
                 .build();
-        assertThrows(ValidationException.class, () -> inMemoryFilmStorage.update(filmUpdate));
+        assertThrows(ValidationException.class, () -> filmController.updateFilm(filmUpdate));
     }
 }
