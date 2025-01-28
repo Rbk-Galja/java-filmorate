@@ -1,8 +1,10 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.*;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 import ru.yandex.practicum.filmorate.validator.MinimumDate;
 import ru.yandex.practicum.filmorate.validator.UpdateValidate;
 
@@ -14,10 +16,7 @@ import java.util.Set;
  * Film.
  */
 @Data
-@Builder
 public class Film {
-
-    private final Set<Long> likes = new HashSet<>();
 
     @NotNull(groups = {UpdateValidate.class})
     private Long id;
@@ -34,4 +33,30 @@ public class Film {
 
     @PositiveOrZero(message = "Продолжительность не может быть меньше нуля")
     private Integer duration;
+
+    @JsonIgnore
+    private Set<Long> likes = new HashSet<>();
+
+    @JsonIgnore
+    private long rate;
+
+    @Builder
+    public Film(Long id, String name, String description, LocalDate releaseDate, Integer duration) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.releaseDate = releaseDate;
+        this.duration = duration;
+    }
+
+    public void addLike(long userId) {
+        likes.add(userId);
+        rate = likes.size();
+    }
+
+    public void removeLike(long userId) {
+        likes.remove(userId);
+        rate = likes.size();
+    }
+
 }

@@ -61,7 +61,7 @@ public class InMemoryFilmStorage implements FilmStorage {
             log.error("Запрос добавления лайка от несуществующего пользователя id = {}", userId);
             throw new IdNotFoundException("Пользователь с указанным id = " + userId + " не найден");
         }
-        film.getLikes().add(userId);
+        film.addLike(userId);
         log.info("Лайк для фильма {} добавлен", film);
         return film;
     }
@@ -77,7 +77,7 @@ public class InMemoryFilmStorage implements FilmStorage {
             log.error("Запрос на удаление лайка от несуществующего пользователя id = {}", userId);
             throw new IdNotFoundException("Пользователь с указанным id = " + userId + " не найден");
         }
-        film.getLikes().remove(userId);
+        film.removeLike(userId);
         log.info("Лайк у фильма {} удален", film);
         return film;
     }
@@ -86,7 +86,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     public List<Film> countPopularFilm(int count) {
         List<Film> allFilm = new ArrayList<>(films.values().stream().toList());
         List<Film> sortFilm = allFilm.stream()
-                .sorted(Comparator.comparingInt(film -> -film.getLikes().size()))
+                .sorted(Comparator.comparingLong(film -> -film.getRate()))
                 .limit(count)
                 .toList();
         log.info("Возвращаем запрошенный список фильмов с максимальным количеством лайков {}", sortFilm);

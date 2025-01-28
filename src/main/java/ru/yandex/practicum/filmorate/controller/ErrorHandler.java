@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -8,6 +9,7 @@ import ru.yandex.practicum.filmorate.exception.IdNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ParameterNotValidException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 
+@Slf4j
 @RestControllerAdvice
 public class ErrorHandler {
 
@@ -28,5 +30,12 @@ public class ErrorHandler {
     public ErrorResponse handleIncorrectPost(final ParameterNotValidException e) {
         return new ErrorResponse("Ошибка данных", "Некорректное значение параметра " +
                 e.getParameter() + ": " + e.getReason());
+    }
+
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler
+    public ErrorResponse handleServerError(final Throwable e) {
+        log.info("500 {}", e.getMessage(), e);
+        return new ErrorResponse(e.getMessage(), "Ошибка работы сервера");
     }
 }

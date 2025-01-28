@@ -25,7 +25,7 @@ public class InMemoryUserStorage implements UserStorage {
         log.info("Создание пользователя User: {} началось", user);
         user.setId(getNextId());
         log.info("Пользователю присвоен id = {}", user.getId());
-        user.setName(userName(user));
+        user.setName(user.userName(user));
         users.put(user.getId(), user);
         log.info("Создание пользователя User: {} завершено", user);
         return user;
@@ -36,7 +36,7 @@ public class InMemoryUserStorage implements UserStorage {
         User oldUser = getById(newUser.getId());
         log.info("Обновление пользователя User: {} началось", oldUser);
         if (oldUser != null) {
-            newUser.setName(userName(newUser));
+            newUser.setName(newUser.userName(newUser));
             log.info("Поле имя обновлено на {}", newUser.getName());
             users.put(oldUser.getId(), newUser);
             log.info("Обновление пользователя User: {} завершено", newUser);
@@ -122,18 +122,12 @@ public class InMemoryUserStorage implements UserStorage {
         return commonFriends;
     }
 
-    private String userName(User user) {
-        if (user.getName() == null || user.getName().isBlank()) {
-            return user.getLogin();
-        }
-        return user.getName();
+    public User getById(long id) {
+        return users.get(id);
     }
 
     private long getNextId() {
         return ++nextId;
     }
 
-    public User getById(long id) {
-        return users.get(id);
-    }
 }
