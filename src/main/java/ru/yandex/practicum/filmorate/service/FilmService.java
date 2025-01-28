@@ -1,15 +1,10 @@
 package ru.yandex.practicum.filmorate.service;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
-import ru.yandex.practicum.filmorate.exception.ParameterNotValidException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.validator.UpdateValidate;
 
 import java.util.Collection;
 import java.util.List;
@@ -25,7 +20,7 @@ public class FilmService {
     }
 
     public Film addFilm(Film film) {
-            return filmStorage.add(film);
+        return filmStorage.add(film);
     }
 
     public Film updateFilm(Film newFilm) {
