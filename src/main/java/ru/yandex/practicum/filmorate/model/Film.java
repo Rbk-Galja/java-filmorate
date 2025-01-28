@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.*;
 import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
 import ru.yandex.practicum.filmorate.validator.MinimumDate;
 import ru.yandex.practicum.filmorate.validator.UpdateValidate;
 
