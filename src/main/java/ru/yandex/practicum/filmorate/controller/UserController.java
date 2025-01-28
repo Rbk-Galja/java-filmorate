@@ -2,9 +2,11 @@ package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.validator.UpdateValidate;
 
 import java.util.Collection;
 import java.util.List;
@@ -38,7 +40,7 @@ public class UserController {
     }
 
     @PutMapping
-    public User updateUser(@RequestBody User newUser) {
+    public User updateUser(@RequestBody @Validated(UpdateValidate.class) User newUser) {
         return userService.updateUser(newUser);
     }
 
@@ -49,8 +51,8 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
-    public List<User> deleteFriend(@PathVariable long id,
-                                   @PathVariable long friendId) {
+    public List<User> deleteFriend(@PathVariable @Validated(UpdateValidate.class) long id,
+                                   @PathVariable @Validated(UpdateValidate.class) long friendId) {
         return userService.deleteFriend(id, friendId);
     }
 

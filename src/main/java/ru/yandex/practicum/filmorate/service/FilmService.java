@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
+import ru.yandex.practicum.filmorate.exception.ParameterNotValidException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.validator.UpdateValidate;
@@ -22,21 +24,19 @@ public class FilmService {
         return filmStorage.findAll();
     }
 
-    public Film addFilm(@Valid Film film) {
-        return filmStorage.add(film);
+    public Film addFilm(Film film) {
+            return filmStorage.add(film);
     }
 
-    public Film updateFilm(@Validated(UpdateValidate.class) Film newFilm) {
+    public Film updateFilm(Film newFilm) {
         return filmStorage.update(newFilm);
     }
 
-    public Film likeFilm(@Validated(UpdateValidate.class) long id,
-                         @Validated(UpdateValidate.class) long userId) {
+    public Film likeFilm(long id, long userId) {
         return filmStorage.likeFilm(id, userId);
     }
 
-    public Film deleteLike(@Validated(UpdateValidate.class) long id,
-                           @Validated(UpdateValidate.class) long userId) {
+    public Film deleteLike(long id, long userId) {
         return filmStorage.deleteLike(id, userId);
     }
 

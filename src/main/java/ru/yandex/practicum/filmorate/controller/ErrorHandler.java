@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -38,4 +39,11 @@ public class ErrorHandler {
         log.info("500 {}", e.getMessage(), e);
         return new ErrorResponse(e.getMessage(), "Ошибка работы сервера");
     }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler
+    public ErrorResponse handleValidateError(final MethodArgumentNotValidException e) {
+        return new ErrorResponse("error", "Введены неккоректные данные");
+    }
 }
+

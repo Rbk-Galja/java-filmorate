@@ -25,26 +25,23 @@ public class UserService {
         return userStorage.add(user);
     }
 
-    public User updateUser(@Validated(UpdateValidate.class) User newUser) {
+    public User updateUser(User newUser) {
         return userStorage.update(newUser);
     }
 
-    public User addFriends(@Validated(UpdateValidate.class) Long id,
-                           @Validated(UpdateValidate.class) Long friendId) {
+    public User addFriends(Long id, Long friendId) {
         return userStorage.addFriends(id, friendId);
     }
 
-    public List<User> getFriendsList(@Validated(UpdateValidate.class) long id) {
+    public List<User> getFriendsList(long id) {
         return userStorage.getFriendsList(id);
     }
 
-    public List<User> deleteFriend(@Validated(UpdateValidate.class) long id,
-                                   @Validated(UpdateValidate.class) long friendId) {
+    public List<User> deleteFriend(long id, long friendId) {
         return userStorage.deleteFriend(id, friendId);
     }
 
-    public List<User> getCommonFriends(@Validated(UpdateValidate.class) long id,
-                                       @Validated({UpdateValidate.class}) long otherId) {
+    public List<User> getCommonFriends(long id, long otherId) {
         return userStorage.getCommonFriends(id, otherId);
     }
 }
