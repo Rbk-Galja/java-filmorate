@@ -10,12 +10,10 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.EmptyResultSelectException;
 import ru.yandex.practicum.filmorate.exception.IdNotFoundException;
 import ru.yandex.practicum.filmorate.model.RatingMPAA;
-import ru.yandex.practicum.filmorate.model.User;
 
 import java.sql.PreparedStatement;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.LinkedHashSet;
 import java.util.List;
 
 @Slf4j
