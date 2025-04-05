@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -10,13 +9,21 @@ import java.util.Collection;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class FilmService {
-    @Autowired
+
     private final FilmStorage filmStorage;
+
+    @Autowired
+    public FilmService(FilmStorage filmStorage) {
+        this.filmStorage = filmStorage;
+    }
 
     public Collection<Film> findAll() {
         return filmStorage.findAll();
+    }
+
+    public Film getById(long id) {
+        return filmStorage.getById(id);
     }
 
     public Film addFilm(Film film) {

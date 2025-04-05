@@ -7,8 +7,7 @@ import ru.yandex.practicum.filmorate.validator.UpdateValidate;
 import ru.yandex.practicum.filmorate.validator.WhiteSpace;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.LinkedHashMap;
 
 @Data
 public class User {
@@ -30,15 +29,17 @@ public class User {
     private LocalDate birthday;
 
     @JsonIgnore
-    private Set<Long> friends = new HashSet<>();
+    private LinkedHashMap<Long, FriendshipStatus> friends = new LinkedHashMap<>();
 
     @Builder
-    public User(Long id, String email, String login, String name, LocalDate birthday) {
+    public User(Long id, String email, String login, String name, LocalDate birthday,
+                LinkedHashMap<Long, FriendshipStatus> friends) {
         this.id = id;
         this.email = email;
         this.login = login;
         this.name = name;
         this.birthday = birthday;
+        this.friends = friends;
     }
 
     public String userName(User user) {

@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import java.util.Collection;
+import java.util.Optional;
 
 public interface Storage<T> {
     Collection<T> findAll();
@@ -8,5 +9,7 @@ public interface Storage<T> {
     T add(T entity);
 
     T update(T entity);
+
+    T getById(long id);
 
 }
