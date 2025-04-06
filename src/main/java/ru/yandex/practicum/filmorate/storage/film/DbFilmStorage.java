@@ -3,12 +3,13 @@ package ru.yandex.practicum.filmorate.storage.film;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.exception.EmptyResultSelectException;
+import org.springframework.util.StopWatch;
 import ru.yandex.practicum.filmorate.exception.IdNotFoundException;
 import ru.yandex.practicum.filmorate.model.Category;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -38,20 +39,26 @@ public class DbFilmStorage implements FilmStorage {
     JdbcTemplate jdbs;
 
     private static final String GET_BY_ID = """
-            SELECT f.id, f.name, f.description, f.releaseDate, f.duration, f.rating_id, f.id
+            SELECT f.id, f.name, f.description, f.releaseDate, f.duration, f.rating_id, rm.rate_MPAA, f.id
             FROM film AS f
+            INNER JOIN rateMPAA AS rm
+            ON f.rating_id = rm.id
             WHERE f.id = ?
             """;
 
     private static final String GET_ALL = """
-            SELECT f.id, f.name, f.description, f.releaseDate, f.duration, f.rating_id, f.id
+            SELECT f.id, f.name, f.description, f.releaseDate, f.duration, f.rating_id, rm.rate_MPAA, f.id
             FROM film AS f
+            LEFT JOIN rateMPAA AS rm
+            ON f.rating_id = rm.id
             """;
 
     private static final String GET_CATEGORY_ID = """
-            SELECT category_id
-            FROM film_category
-            WHERE film_id =
+            SELECT fc.category_id, ct.category_name
+            FROM film_category AS fc
+            INNER JOIN category AS ct
+            ON fc.category_id = ct.id
+            WHERE film_id = ?
             """;
 
     private static final String ADD_FILM = """
@@ -128,13 +135,7 @@ public class DbFilmStorage implements FilmStorage {
     @Override
     public Film getById(long id) {
         log.info("Получение фильма с id = {} началось", id);
-        List<Film> film = jdbs.query(GET_BY_ID, getFilmMapper(), id);
-        if (!film.isEmpty()) {
-            log.info("Получение фильма {} завершено", film);
-            return film.getFirst();
-        }
-        log.error("Фильм с id = {} не найден", id);
-        throw new EmptyResultSelectException("Фильм с id = " + id + " не найден", 0);
+        return jdbs.queryForObject(GET_BY_ID, getFilmMapper(), id);
     }
 
     @Override
@@ -180,9 +181,9 @@ public class DbFilmStorage implements FilmStorage {
             stmt.setLong(5, id);
             return stmt;
         });
-        entity.setMpa(ratingMapper(entity));
-        deleteCategory(id);
+        deleteCategory(entity.getId());
         addCategoryOnFilm(entity);
+        addRatingFilm(entity.getMpa(), id);
         log.info("Обновление фильма Film завершено: {}", entity);
         return entity;
     }
@@ -262,41 +263,30 @@ public class DbFilmStorage implements FilmStorage {
     private void addCategoryOnFilm(Film entity) {
         List<Category> category = categoryMapper(entity).stream().toList();
         log.info("Добавление жанров {} фильму id = {} началось", category, entity.getId());
-        try {
-            Class.forName("org.h2.Driver");
-            Connection con = DriverManager.getConnection("jdbc:h2:file:./db/filmorate", "sa", "password");
-            PreparedStatement ps = con.prepareStatement(ADD_CATEGORY);
-            con.setAutoCommit(false);
-            for (int i = 0; i < category.size(); i++) {
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
+        jdbs.batchUpdate(ADD_CATEGORY, new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
                 ps.setString(1, category.get(i).getName());
                 ps.setLong(2, entity.getId());
-                ps.addBatch();
             }
-            ps.executeBatch();
-            log.info("Добавление жанров к фильму id = {} завершено", entity.getId());
-            con.commit();
-        } catch (Exception e) {
-            log.error("Ошибка добавления жанров к фильму id = {}", entity.getId());
-            System.out.println("Ошибка: " + e.getMessage());
-        }
+
+            @Override
+            public int getBatchSize() {
+                return category.size();
+            }
+        });
     }
 
     private LinkedHashSet<Category> getCategoryFilm(long id) {
-        LinkedHashSet<Category> category = new LinkedHashSet<>();
         log.info("Получение id жанров для фильма id = {} началось", id);
-        try {
-            Connection conn = DriverManager.getConnection("jdbc:h2:file:./db/filmorate", "sa", "password");
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(GET_CATEGORY_ID + id);
-            while (rs.next()) {
-                category.add(categoryStorage.getById(rs.getLong(1)));
-            }
-
-        } catch (SQLException e) {
-            log.error("Ошибка получения жанров для фильма id = {}", id);
-            System.out.println("Ошибка: " + e.getMessage());
+        LinkedHashSet<Category> category = new LinkedHashSet<>(jdbs.query(GET_CATEGORY_ID, getCategoryMapper(), id));
+        if (!category.isEmpty()) {
+            log.info("Получение жанров:\n {} для фильма id = {} завершено", category, id);
+            return category;
         }
-        log.info("Получение жанров:\n {} для фильма id = {} завершено", category, id);
+        log.info("Жанры для фильма id = {} не указаны", id);
         return category;
     }
 
@@ -318,8 +308,31 @@ public class DbFilmStorage implements FilmStorage {
                 .description(resultset.getString("description"))
                 .releaseDate(resultset.getDate("releaseDate").toLocalDate())
                 .duration(resultset.getInt("duration"))
-                .mpa(getFilmRatingMapper(resultset.getLong("rating_id")))
+                .mpa(getMPAAmapper(resultset))
                 .genres(getCategoryFilm(resultset.getLong("id")))
+                .build();
+    }
+
+    public RatingMPAA getMPAAmapper(ResultSet rs) {
+        RatingMPAA mpaa = null;
+        try {
+            Long id = rs.getLong("rating_id");
+            String name = rs.getString("rate_MPAA");
+            mpaa = RatingMPAA.builder()
+                    .id(id)
+                    .name(name)
+                    .build();
+        } catch (SQLException ex) {
+            log.error("Категория для фильма не найдена");
+            ex.getMessage();
+        }
+        return mpaa;
+    }
+
+    private static RowMapper<Category> getCategoryMapper() {
+        return (resultset, rowNum) -> Category.builder()
+                .id(resultset.getLong("category_id"))
+                .name(resultset.getString("category_name"))
                 .build();
     }
 
@@ -337,12 +350,5 @@ public class DbFilmStorage implements FilmStorage {
         }
         log.info("Добавление жанров завершено {}", result);
         return result;
-    }
-
-    private RatingMPAA getFilmRatingMapper(long id) {
-        if (id == 0) {
-            return null;
-        }
-        return mpaaStorage.getById(id);
     }
 }
