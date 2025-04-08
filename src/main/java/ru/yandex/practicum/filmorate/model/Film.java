@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.validator.UpdateValidate;
 
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
@@ -34,28 +35,25 @@ public class Film {
     private Integer duration;
 
     @JsonIgnore
-    private Set<Long> likes = new HashSet<>();
-
-    @JsonIgnore
     private long rate;
 
+    private RatingMPAA mpa;
+
+    @JsonIgnore
+    private Set<Long> likes = new HashSet<>();
+
+    private LinkedHashSet<Category> genres;
+
     @Builder
-    public Film(Long id, String name, String description, LocalDate releaseDate, Integer duration) {
+    public Film(Long id, String name, String description, LocalDate releaseDate, Integer duration, RatingMPAA mpa,
+                LinkedHashSet<Category> genres) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;
+
         this.duration = duration;
+        this.mpa = mpa;
+        this.genres = genres;
     }
-
-    public void addLike(long userId) {
-        likes.add(userId);
-        rate = likes.size();
-    }
-
-    public void removeLike(long userId) {
-        likes.remove(userId);
-        rate = likes.size();
-    }
-
 }

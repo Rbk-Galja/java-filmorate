@@ -6,9 +6,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.yandex.practicum.filmorate.exception.IdNotFoundException;
-import ru.yandex.practicum.filmorate.exception.ParameterNotValidException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.exception.*;
 
 @Slf4j
 @RestControllerAdvice
@@ -18,6 +16,13 @@ public class ErrorHandler {
     @ExceptionHandler
     public ErrorResponse handleIdNotFound(final IdNotFoundException e) {
         return new ErrorResponse("Ошибка данных", "Пользователь с указанным id не найден");
+    }
+
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler
+    public ErrorResponse handleEmptyResultSelect(final EmptyResultSelectException e) {
+        return new ErrorResponse("Ошибка получения данных из таблицы",
+                "Ресурс по заданным параметрам не найден");
     }
 
     @ResponseStatus(HttpStatus.NOT_FOUND)

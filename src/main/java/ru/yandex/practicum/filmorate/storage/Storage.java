@@ -9,4 +9,6 @@ public interface Storage<T> {
 
     T update(T entity);
 
+    T getById(long id);
+
 }
